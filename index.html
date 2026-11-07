@@ -353,10 +353,10 @@ window.DELT_CONFIG = {
             </label>
             <div id="dl-sent" style="display:none;flex-direction:column;gap:10px;background:var(--card,#fff);border-radius:16px;padding:16px;line-height:1.5">
               <b style="font-size:18px">📬 Sjekk e-posten din</b>
-              <span>Vi har sendt en e-post til <b id="dl-sent-to"></b>. Åpne den og trykk på lenken <b>«Sign in»</b>. Da blir du logget inn.</span>
-              <span style="color:var(--muted,#5B6660);font-size:14px">Finner du den ikke? Sjekk søppelpost. Åpne lenken på samme telefon eller PC som du bruker appen på.</span>
+              <span>Vi har sendt en kode til <b id="dl-sent-to"></b>. Skriv den inn under.</span>
+              <span style="color:var(--muted,#5B6660);font-size:14px">Finner du den ikke? Sjekk søppelpost. Det kan ta et minutt.</span>
             </div>
-            <label id="dl-code-wrap" style="display:none;flex-direction:column;gap:6px;font-weight:600">Fikk du en kode i stedet? Skriv den her
+            <label id="dl-code-wrap" style="display:none;flex-direction:column;gap:6px;font-weight:600">Koden fra e-posten
               <input id="dl-code" class="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456" style="height:52px;letter-spacing:4px;font-size:22px">
             </label>
             <label id="dl-name-wrap" style="display:none;flex-direction:column;gap:6px;font-weight:600">Hva heter du?
@@ -382,7 +382,7 @@ window.DELT_CONFIG = {
           $('dl-lead').textContent = s === 'email' ? $('dl-lead').textContent
             : s === 'code' ? '' : 'Navnet ditt vises for de andre i gruppene dine.';
           $('dl-lead').style.display = $('dl-lead').textContent ? '' : 'none';
-          const f = $(s === 'email' ? 'dl-email' : s === 'code' ? null : 'dl-name'); if (f) f.focus();
+          const f = $(s === 'email' ? 'dl-email' : s === 'code' ? 'dl-code' : 'dl-name'); if (f) f.focus();
         };
         $('dl-back').onclick = () => show('email');
         $('dl-form').onsubmit = async ev => {
@@ -2205,7 +2205,7 @@ return function(text){ var q = new QRCode(-1, L.M); q.addData(text); q.make(); v
   const go = v => { view = v; render(); window.scrollTo(0, 0); };
   const vLoading = () => `<div class="center"><div class="spinner" aria-hidden="true"></div><div class="muted">Laster …</div></div>`;
   const storageNote = () => storage === 'shared'
-    ? `<p class="muted small" style="margin:0">Dataene lagres i appen, så alle som har tilgang til lenken ser det samme.</p>`
+    ? `<p class="muted small" style="margin:0">Dataene lagres på kontoen din, så alle i gruppen ser det samme.</p>`
     : `<p class="muted small" style="margin:0">Dataene lagres bare i denne nettleseren.</p>`;
 
   function vWelcome() {
@@ -2283,7 +2283,7 @@ return function(text){ var q = new QRCode(-1, L.M); q.addData(text); q.make(); v
   }
 
   // ---------- invite with link / QR code ----------
-  const APP_URL = (window.DELT_CONFIG && window.DELT_CONFIG.appUrl) || 'https://claude.ai/artifact/5N1YJrfWsHC4Gg2KcZd8ro';
+  const APP_URL = (window.DELT_CONFIG && window.DELT_CONFIG.appUrl) || (location.origin + location.pathname);
   const inviteLink = code => `${APP_URL}#bli-med-${code}`;
   const newCode = () => Array.from({ length: 10 }, () => 'abcdefghjkmnpqrstuvwxyz23456789'[Math.floor(Math.random() * 31)]).join('');
   function qrSvg(text) {
@@ -2306,7 +2306,7 @@ return function(text){ var q = new QRCode(-1, L.M); q.addData(text); q.make(); v
         <button class="btn-dark" data-act="copyInvite" style="width:100%">Kopier lenke</button>
         <div id="imsg" class="muted small" aria-live="polite"></div>
       </div>
-      <div class="notice">Den som skal bli med, må ha tilgang til appen på claude.ai. Del appen med dem fra Del-knappen øverst på siden, og gi dem lov til å endre. Deretter kan de bruke lenken eller QR-koden.</div>
+      <div class="notice">Den som åpner lenken, logger inn med e-posten sin og kommer rett inn i gruppen.</div>
       <button class="btn-link" data-act="newInvite" style="justify-content:flex-start;padding:0">Lag ny lenke (den gamle slutter å virke)</button>
       <div class="muted small">${g.members.length} av ${MAX_MEMBERS} plasser er i bruk.</div>`;
   }
@@ -2504,7 +2504,7 @@ return function(text){ var q = new QRCode(-1, L.M); q.addData(text); q.make(); v
         ${sec('Hva som lagres', '<ul style="margin:0;padding-left:20px"><li>Profilen din: navnet du velger, profilbilde og telefonnummer hvis du legger det inn.</li><li>Gruppene du er med i, og hvem som er med i dem.</li><li>Kvitteringer og utgifter: butikk, dato, varer, priser, hvem som betalte og hvordan det er fordelt.</li><li>Faste utgifter, handlelister, matbudsjett og oppgjør.</li><li>Når du sist åpnet varslene, så appen vet hva som er nytt.</li></ul>')}
         ${sec('Hvorfor', 'For at appen skal kunne regne ut hvem som skylder hvem, vise varsler og la gruppen se det samme. Grunnlaget er at du selv har valgt å bruke appen og legge inn opplysningene.')}
         ${sec('Kvitteringsbilder', 'Når du skanner en kvittering, sendes bildet til Claude (Anthropic) for å lese varene og prisene. Appen lagrer ikke selve bildet, bare varene og prisene som blir lest ut.')}
-        ${sec('Hvem som kan se dataene', 'Alle som er med i en gruppe, ser kvitteringene, utgiftene og oppgjørene i den gruppen. Navnet, profilbildet og telefonnummeret ditt kan ses av alle som har tilgang til appen. Dataene lagres hos Anthropic, som driver claude.ai, der appen kjører.')}
+        ${sec('Hvem som kan se dataene', 'Alle som er med i en gruppe, ser kvitteringene, utgiftene og oppgjørene i den gruppen. Navnet, profilbildet og telefonnummeret ditt kan ses av alle som har tilgang til appen. Dataene lagres hos Supabase, som er databasetjenesten appen bruker.')}
         ${sec('Hvor lenge', 'Dataene lagres til du sletter dem, eller til gruppen slettes. Når du sletter kontoen, fjernes profilen din med en gang.')}
         ${sec('Rettighetene dine', 'Du har rett til å se dataene dine, rette dem, få dem slettet og få dem utlevert. Du kan gjøre det meste selv under «Se dataene mine» og «Slett kontoen min». Hvis du mener vi behandler opplysningene dine feil, kan du klage til Datatilsynet (datatilsynet.no).')}
         ${sec('Kontakt', 'Spørsmål om personvern: [NAVN OG E-POST TIL DEN SOM DRIVER APPEN]')}
@@ -2549,7 +2549,6 @@ return function(text){ var q = new QRCode(-1, L.M); q.addData(text); q.make(); v
           <li>Du fjernes fra alle gruppene dine (${mine.length} stk).</li>
           <li>I gruppene med andre blir kvitteringene og oppgjørene stående, så regnestykket deres fortsatt stemmer, men navnet ditt erstattes med «Slettet bruker».</li>
           <li>Grupper der ingen andre har konto, slettes helt.</li>
-          <li>Kontoen din på claude.ai slettes ikke.</li>
         </ul>
         <label class="field">Skriv SLETT for å bekrefte<input class="text" id="delconfirm" autocomplete="off" placeholder="SLETT"></label>
         <div id="delerr" class="notice" style="display:none" role="alert"></div>
@@ -2951,7 +2950,7 @@ return function(text){ var q = new QRCode(-1, L.M); q.addData(text); q.make(); v
               <span class="muted small">${esc(n.g.name)}</span>
             </div>
           </button>`).join('')}` : ''}
-      ${meUid ? '' : `<div class="notice">Appen fant ikke hvem du er logget inn som, så kontoen vises ikke. Åpne appen på claude.ai mens du er logget inn.</div>`}`;
+      ${meUid ? '' : `<div class="notice">Appen fant ikke hvem du er logget inn som. Prøv å laste siden på nytt, eller logg ut og inn igjen.</div>`}`;
   }
 
   function vPeople() {
